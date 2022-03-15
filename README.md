@@ -1,2 +1,2 @@
 # java-testcompose
-A clean to run your containerised tests
+A clean way to run your containerised tests

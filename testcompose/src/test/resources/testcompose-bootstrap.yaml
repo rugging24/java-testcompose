@@ -1,0 +1,81 @@
+services:
+  - name: database
+    image: "postgres:13"
+    command: ""
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres_db
+      POSTGRES_PASSWORD: password
+    exposed_ports:
+      - 5432
+    volumes:
+      - host: "/data_volume"
+        container: "/data"
+        mode: "rw"
+        source: "local"
+    log_wait_parameters:
+      log_line_regex: ".*database system is ready to accept connections.*"
+      log_line_regex_occurrence: 1
+  - name: application
+    image: "python:3.9"
+    command: "/bin/bash -x /run_app.sh"
+    environment:
+      DB_URL: "${{database.postgres_user}}:${{database.postgres_password}}@${{database.container_hostname}}:5432/${{database.postgres_db}}"
+      KAFKA_BOOTSTRAP_SERVERS: "${{kafka.container_hostname}}:29092"
+      KAFKA_OFFSET_RESET: "earliest"
+      KAFKA_TOPIC: "test_kafka_topic"
+    exposed_ports:
+      - 8000
+    volumes:
+      - host: "some_docker_volume"
+        container: "/data"
+        mode: "rw"
+        source: "docker"
+      - host: "/data2"
+        container: "/data2"
+        mode: "ro"
+    log_wait_parameters:
+      log_line_regex: ".*Application startup complete.*"
+      log_line_regex_occurrence: 1
+    http_wait_parameters:
+      http_port: "8000"
+      response_status_code: 200
+      end_point: "/ping"
+    depends_on:
+      - database
+      - kafka
+  - name: zookeeper
+    image: confluentinc/cp-zookeeper:6.2.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    log_wait_parameters:
+      log_line_regex: ".*Started AdminServer on address.*"
+      log_line_regex_occurrence: 1
+  - name: kafka
+    image: confluentinc/cp-kafka:6.2.1
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_ZOOKEEPER_CONNECT: "${{zookeeper.container_hostname}}:${{zookeeper.zookeeper_client_port}}"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://${{self.container_hostname}}:29092,CONNECTIONS_FROM_HOST://localhost:${{self.external_port_9092}}"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONNECTIONS_FROM_HOST:PLAINTEXT"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:29092, CONNECTIONS_FROM_HOST://0.0.0.0:9092"
+    exposed_ports:
+      - 9092
+    log_wait_parameters:
+      log_line_regex: ".*Ready to serve as the new controller.*"
+      log_line_regex_occurrence: 1
+    depends_on:
+      - zookeeper
+# Add memory settings per container
+
+# database.container_hostname -> hostname -> container name
+# self.container_hostname -> hostname -> container name
+# database.external_port_5432 -> mapped host port
+# self.hostport_9092 -> mapped host port for the current container. Container must already be running to obtain this
+# container external host -> String ipAddress = container.getHost();
+# container external port -> container.getMappedPort(8080);
