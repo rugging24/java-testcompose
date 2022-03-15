@@ -41,7 +41,6 @@ public class RunContainers {
     }
 
     public List<OrderedService> runTestContainers(){
-        List<OrderedService> o = mapper.convertValue(new ArrayList<OrderedService>(), new TypeReference<List<OrderedService>>() { });
         List<OrderedService> orderedServices = containerConfig.rankConfigServices(
                 Set.of(), mapper.convertValue(new ArrayList<OrderedService>(), new TypeReference<>() {}),
                 configServices.getServices());
