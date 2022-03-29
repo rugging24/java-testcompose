@@ -45,15 +45,15 @@ public class RunContainers {
     public List<OrderedService> runTestContainers(){
         List<OrderedService> orderedServices = containerConfig.rankConfigServices(
                 Set.of(), mapper.convertValue(new ArrayList<OrderedService>(), new TypeReference<>() {}),
-                getConfigServices().getServices());
+                getConfigServices().getServices())
+                .stream().sorted().collect(Collectors.toList());
 
         Map<String, RunningContainer> runningContainerMap = new HashMap<>();
         ProcessedServices processedServices =  new ProcessedServices(runningContainerMap);
 
-        List<OrderedService> services = orderedServices.stream().sorted().collect(Collectors.toList());
-        for(OrderedService service: services){
+        for(OrderedService os: orderedServices){
             BaseContainer baseContainer = new BaseContainer.Builder()
-                    .withTestService(service.getService(), processedServices)
+                    .withTestService(os.getService(), processedServices)
                     .withTestNetwork(testNetwork.getContainerNetwork())
                     .build();
             baseContainer.startContainer();
