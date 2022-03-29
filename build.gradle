@@ -1,0 +1,88 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = groupId
+version = packageVersion
+sourceCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.projectlombok:lombok:1.18.22'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.2'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.2'
+//    implementation group: 'com.typesafe', name: 'config', version: '1.4.1'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.0'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.13.0'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.13.0'
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.13.2'
+
+    implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'
+
+    implementation group: 'org.testcontainers', name: 'testcontainers', version: '1.16.3'
+    implementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.16.3'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.4.0'
+    // test container modules
+    implementation group: 'org.testcontainers', name: 'kafka', version: '1.16.3'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+}
+
+tasks.named('jar') {
+    manifest {
+        attributes(
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version
+        )
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            groupId = project.group
+            artifactId = artifactId
+            version = project.version
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url mavenCentral()
+            credentials {
+                username mvnCentralUsername
+                password System.env.MAVEN_CENTRAL_TOKEN
+            }
+        }
+    }
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+javadoc {
+    if(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11)) {
+        options.addBooleanOption('html5', true)
+    }
+}
