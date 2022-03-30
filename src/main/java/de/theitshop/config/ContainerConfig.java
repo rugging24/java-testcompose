@@ -14,11 +14,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class ContainerConfig {
-    private final ObjectMapper jsonMapper = new ObjectMapper();
     private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
     private static final String defaultConfigFileName = "testcompose-bootstrap";
 
@@ -56,19 +54,22 @@ public class ContainerConfig {
         return configServices;
     }
 
-    private Service getService(String serviceName, List<OrderedService> processedServices, List<Service> unprocessedServices){
+    private void checkCyclicDependency(String serviceName, String dependentServiceName, List<OrderedService> processedServices, List<Service> unprocessedServices){
         Service neededService = null;
         for (Service s: unprocessedServices){
-            if (s.getName().equalsIgnoreCase(serviceName))
+            if (s.getName().equalsIgnoreCase(dependentServiceName))
                 neededService = s;
         }
         if (neededService == null){
             for (OrderedService s: processedServices){
-                if (s.getService().getName().equalsIgnoreCase(serviceName))
+                if (s.getService().getName().equalsIgnoreCase(dependentServiceName))
                     neededService = s.getService();
             }
         }
-        return neededService;
+        assert neededService != null;
+        if (neededService.getDependsOn().contains(serviceName))
+            throw new IllegalArgumentException("Cyclic container relationship found for service "
+                    + serviceName + " and service :" + neededService.getName());
     }
 
     public List<OrderedService> rankConfigServices(Set<String> serviceNames, List<OrderedService> processedServices, List<Service> unprocessedServices){
@@ -77,7 +78,7 @@ public class ContainerConfig {
         if(unprocessedServices.size() == 0){
             if (serviceNames.size() != processedServices.size())
                 throw new RuntimeException("Ordered Service improperly computed!");
-            return jsonMapper.convertValue(processedServices, new TypeReference<>() {});
+            return processedServices;
         }else {
             Set<String> processedServiceNames = new HashSet<>(serviceNames);
             List<OrderedService> processedServicesCopy = new ArrayList<>(processedServices);
@@ -85,20 +86,16 @@ public class ContainerConfig {
             for (Service service: unprocessedServices){
                 if (service.getDependsOn().size() == 0){
                     processedServiceNames.add(service.getName());
-                    processedServicesCopy.add(jsonMapper.convertValue(new OrderedService(rank, service), OrderedService.class));
+                    processedServicesCopy.add(new OrderedService(rank, service));
                     rank+=1;
                 }else {
                     if (processedServiceNames.containsAll(service.getDependsOn())){
                         processedServiceNames.add(service.getName());
-                        processedServicesCopy.add(jsonMapper.convertValue(new OrderedService(rank, service), OrderedService.class));
+                        processedServicesCopy.add(new OrderedService(rank, service));
                         rank+=1;
-                    } else {
-                        for (String dependentServiceName: service.getDependsOn()){
-                            Service s = getService(dependentServiceName, processedServicesCopy, unprocessedServices);
-                            if (s.getDependsOn().contains(service.getName()))
-                                throw new IllegalArgumentException("Cyclic container relationship found for service " + service.getName());
-                        }
-                    }
+                    } else
+                        service.getDependsOn().forEach(dependentServiceName ->
+                                checkCyclicDependency(service.getName(), dependentServiceName, processedServicesCopy, unprocessedServices));
                 }
             }
             List<Service> copyOfUnprocessedServices = new ArrayList<>();
@@ -107,7 +104,8 @@ public class ContainerConfig {
                         if (!processedServiceNames.contains(v.getName())) copyOfUnprocessedServices.add(v);
                     }
             );
-            processedServices = jsonMapper.convertValue(processedServicesCopy, new TypeReference<>() {});
+            processedServices.clear();
+            processedServices.addAll(processedServicesCopy);
             return rankConfigServices(processedServiceNames, processedServices, copyOfUnprocessedServices);
         }
     }

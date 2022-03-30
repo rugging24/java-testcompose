@@ -15,8 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class RunContainers {
-    public Map<String, BaseContainer> baseContainerMap = new HashMap<>();
-
+    private Map<String, BaseContainer> baseContainerMap;
     private ConfigServices configServices;
     private final ObjectMapper mapper = new ObjectMapper();
     private final ContainerConfig containerConfig = new ContainerConfig();
@@ -42,7 +41,13 @@ public class RunContainers {
         return configServices;
     }
 
-    public List<OrderedService> runTestContainers(){
+    public Map<String, BaseContainer> getBaseContainerMap(){
+        return baseContainerMap;
+    }
+
+    public List<OrderedService> startTestContainers(){
+        isDockerRunning();
+        baseContainerMap = new HashMap<>();
         List<OrderedService> orderedServices = containerConfig.rankConfigServices(
                 Set.of(), mapper.convertValue(new ArrayList<OrderedService>(), new TypeReference<>() {}),
                 getConfigServices().getServices())
@@ -65,17 +70,20 @@ public class RunContainers {
     }
 
     public void stopTestContainers(List<OrderedService> orderedServices) {
+        isDockerRunning();
         Collections.reverse(orderedServices);
         if (orderedServices.size() != 0 && baseContainerMap.size() != 0){
             orderedServices.forEach(c -> baseContainerMap.get(c.getService().getName()).stopContainer());
         }
+        baseContainerMap.clear();
     }
 
-    public boolean isDockerRunning(){
+    private void isDockerRunning(){
         try{
-            return DockerClientFactory.instance().isDockerAvailable();
+            DockerClientFactory.instance().isDockerAvailable();
         }catch (Exception exc){
-            return false;
+            exc.printStackTrace();
+            throw new RuntimeException("Docker doesn't seem to be running on this machine");
         }
     }
 }

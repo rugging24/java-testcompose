@@ -56,7 +56,7 @@ def kafka_producer(data: Dict[str, Any]):
         producer = Producer(
             {
                 "bootstrap.servers": f"{os.getenv('KAFKA_BOOTSTRAP_SERVERS')}",
-                "debug": "all",
+#                 "debug": "all",
                 "socket.timeout.ms": 60,
             }
         )
@@ -76,8 +76,8 @@ def kafka_consumer(data: Dict[str, Any]):
             {
                 "bootstrap.servers": f"{os.getenv('KAFKA_BOOTSTRAP_SERVERS')}",
                 "group.id": data.get("group_id") or uuid4().hex,
-                "auto.offset.reset": f"{os.getenv('KAFKA_OFFSET_RESET')}",
-                "debug": "broker, topic, protocol",
+                "auto.offset.reset": f"{os.getenv('KAFKA_OFFSET_RESET')}"
+#                 "debug": "broker, topic, protocol",
             }
         )
         c.subscribe([f"{os.getenv('KAFKA_TOPIC')}"])
@@ -89,7 +89,7 @@ def kafka_consumer(data: Dict[str, Any]):
                 print("Consumer error: {}".format(msg.error()))
                 break
             else:
-                version = json.loads(json.loads(msg.value().decode("utf-8")))
+                version = json.loads(msg.value().decode("utf-8"))
                 break
         c.close()
     except Exception:

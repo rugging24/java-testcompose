@@ -9,7 +9,6 @@ import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class OrderedService implements Serializable, Comparable<OrderedService> {
     private Integer rank;
     private Service service;

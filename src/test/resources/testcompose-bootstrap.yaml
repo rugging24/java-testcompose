@@ -29,7 +29,7 @@ services:
       - host: "docker-test-files/app.py"
         container: "/app.py"
         mode: "ro"
-        source: "resources"  # filesystem
+        source: "resources"
     log_wait_parameters:
       log_line_regex: ".*Application startup complete.*"
       log_line_regex_occurrence: 1
@@ -64,12 +64,8 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-#      KAFKA_ZOOKEEPER_CONNECT: "${{zookeeper.container_hostname}}:${{zookeeper.zookeeper_client_port}}"
-    exposed_ports: # ignores this setting
+    exposed_ports:
       - 9093
-#    log_wait_parameters: # ignored
-#      log_line_regex: ".*Ready to serve as the new controller.*"
-#      log_line_regex_occurrence: 1
     depends_on:
       - zookeeper
 #    exec_command_after_container_startup:
