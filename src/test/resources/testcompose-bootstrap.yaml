@@ -58,7 +58,7 @@ services:
         zookeeper:
           external: true
           connection_string: "${{zookeeper.container_hostname}}:${{zookeeper.zookeeper_client_port}}"
-    environment: # optional => uses the default env variables from the original module
+    environment:
       KAFKA_BROKER_ID: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -68,24 +68,3 @@ services:
       - 9093
     depends_on:
       - zookeeper
-#    exec_command_after_container_startup:
-#      - name: change_kafka_advertised_listener_config
-#        command: >-
-#          kafka-configs --alter
-#          --bootstrap-server=PLAINTEXT://${{self.container_host_alias}}:9092
-#          --entity-type=brokers
-#          --entity-name=${{env.KAFKA_BROKER_ID}}
-#          --add-config advertised.listeners=["BROKER://${{self.container_host_alias}}:9092","PLAINTEXT://${{self.container_host_address}}:${{self.external_port_9093}}"]
-
-# Add memory settings per container
-# "PLAINTEXT://${{self.container_hostname}}:29092,CONNECTIONS_FROM_HOST://localhost:${{self.external_port_9092}}"
-# database.container_hostname -> hostname -> container name
-# self.container_hostname -> hostname -> container name
-# database.external_port_5432 -> mapped host port
-# self.hostport_9092 -> mapped host port for the current container. Container must already be running to obtain this
-# container external host -> String ipAddress = container.getHost();
-# container external port -> container.getMappedPort(8080);
-# Container Host address -> container_host_address -> DockerClientFactory.instance().dockerHostIpAddress();
-# "PLAINTEXT://${{self.container_hostname}}:29092, CONNECTIONS_FROM_HOST://${{container_host_address}}:${{self.external_port_9092}}"
-# ${{self.container_network_alias}}
-# "PLAINTEXT://${{self.container_hostname}}:29092"

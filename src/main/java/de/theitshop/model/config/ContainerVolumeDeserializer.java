@@ -7,6 +7,7 @@ import org.testcontainers.containers.BindMode;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -36,13 +37,13 @@ public class ContainerVolumeDeserializer extends JsonDeserializer<ContainerVolum
         return containerVolume;
     }
 
-    private String checkHostPath(JsonNode hostNode, JsonNode sourceNode){
+    private String checkHostPath(JsonNode hostNode, JsonNode sourceNode) throws FileNotFoundException {
         if (sourceNode.asText().equalsIgnoreCase(FILE_MOUNT_SRC)) {
             if ((new File(hostNode.asText())).exists()) return hostNode.asText();
-            else throw new IllegalArgumentException("The File:" + hostNode.asText() + " does not exists");
+            else throw new FileNotFoundException("The File:" + hostNode.asText() + " does not exists");
         }else {
             InputStream stream = this.getClass().getClassLoader().getResourceAsStream(hostNode.asText());
-            if (stream == null) throw new IllegalArgumentException("The File:" + hostNode.asText() + " does not exists");
+            if (stream == null) throw new FileNotFoundException("The File:" + hostNode.asText() + " does not exists");
             return hostNode.asText();
         }
     }
