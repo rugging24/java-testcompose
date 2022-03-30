@@ -21,7 +21,7 @@ class RunContainerTest {
         final String appContainerName = "application";
         final int exposedContainerPort = 8000;
         RunContainers runContainers = new RunContainers();
-        List<OrderedService> orderedServiceList = runContainers.startTestContainers();
+        runContainers.startTestContainers();
         BaseContainer applicationContainer = runContainers.getBaseContainerMap().get(appContainerName);
         Map<String, Object> kafkaData = Map.of(
                 "name", "TestName",
@@ -55,7 +55,7 @@ class RunContainerTest {
                 .returnContent();
 
         assertEquals(kafkaData, mapper.readValue(kafkaConsumer.asString(), Map.class));
-        runContainers.stopTestContainers(orderedServiceList);
+        runContainers.stopTestContainers();
         assertEquals(0, runContainers.getBaseContainerMap().size());
     }
 }

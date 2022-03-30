@@ -6,6 +6,7 @@ import de.theitshop.config.ContainerConfig;
 import de.theitshop.container.BaseContainer;
 import de.theitshop.model.config.ConfigServices;
 import de.theitshop.model.config.OrderedService;
+import de.theitshop.model.config.Service;
 import de.theitshop.model.container.ProcessedServices;
 import de.theitshop.model.container.RunningContainer;
 import de.theitshop.networking.ContainerNetwork;
@@ -15,25 +16,36 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class RunContainers {
+    private List<OrderedService> orderedServices;
     private Map<String, BaseContainer> baseContainerMap;
     private ConfigServices configServices;
     private final ObjectMapper mapper = new ObjectMapper();
     private final ContainerConfig containerConfig = new ContainerConfig();
     private final ContainerNetwork testNetwork = new ContainerNetwork();
-    private final String configFileName;
 
 
     public RunContainers() {
-        this.configFileName = null;
-        setConfigServices();
+        setConfigServices(null);
+        setOrderedServices(getConfigServices().getServices());
     }
 
     public RunContainers(String configFileName){
-        this.configFileName = configFileName;
-        setConfigServices();
+        setConfigServices(configFileName);
+        setOrderedServices(getConfigServices().getServices());
     }
 
-    private void setConfigServices(){
+    private void setOrderedServices(List<Service> services){
+        this.orderedServices = containerConfig.rankConfigServices(
+                        Set.of(), mapper.convertValue(new ArrayList<OrderedService>(), new TypeReference<>() {}),
+                        services)
+                .stream().sorted().collect(Collectors.toList());
+    }
+
+    public List<OrderedService> getOrderedServices(){
+        return orderedServices;
+    }
+
+    private void setConfigServices(String configFileName){
         this.configServices = containerConfig.parseConfig(containerConfig.readTestConfig(configFileName));
     }
 
@@ -45,18 +57,13 @@ public class RunContainers {
         return baseContainerMap;
     }
 
-    public List<OrderedService> startTestContainers(){
+    public void startTestContainers(){
         isDockerRunning();
         baseContainerMap = new HashMap<>();
-        List<OrderedService> orderedServices = containerConfig.rankConfigServices(
-                Set.of(), mapper.convertValue(new ArrayList<OrderedService>(), new TypeReference<>() {}),
-                getConfigServices().getServices())
-                .stream().sorted().collect(Collectors.toList());
-
         Map<String, RunningContainer> runningContainerMap = new HashMap<>();
         ProcessedServices processedServices =  new ProcessedServices(runningContainerMap);
 
-        for(OrderedService os: orderedServices){
+        for(OrderedService os: getOrderedServices()){
             BaseContainer baseContainer = new BaseContainer.Builder()
                     .withTestService(os.getService(), processedServices)
                     .withTestNetwork(testNetwork.getContainerNetwork())
@@ -66,14 +73,13 @@ public class RunContainers {
             runningContainerMap.put(baseContainer.getRunningContainer().getServiceName(), baseContainer.getRunningContainer());
             processedServices = new ProcessedServices(runningContainerMap);
         }
-        return orderedServices;
     }
 
-    public void stopTestContainers(List<OrderedService> orderedServices) {
+    public void stopTestContainers() {
         isDockerRunning();
-        Collections.reverse(orderedServices);
-        if (orderedServices.size() != 0 && baseContainerMap.size() != 0){
-            orderedServices.forEach(c -> baseContainerMap.get(c.getService().getName()).stopContainer());
+        Collections.reverse(getOrderedServices());
+        if (getOrderedServices().size() != 0 && baseContainerMap.size() != 0){
+            getOrderedServices().forEach(c -> baseContainerMap.get(c.getService().getName()).stopContainer());
         }
         baseContainerMap.clear();
     }
