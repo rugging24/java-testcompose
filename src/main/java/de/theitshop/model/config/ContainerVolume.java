@@ -9,7 +9,6 @@ import lombok.NonNull;
 import org.testcontainers.containers.BindMode;
 
 @Data
-//@AllArgsConstructor
 @NoArgsConstructor
 @JsonDeserialize(using = ContainerVolumeDeserializer.class)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
