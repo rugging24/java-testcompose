@@ -29,7 +29,7 @@ public interface ContainerInitializer {
     WaitStrategy containerServiceHTTPWaiter(Service service);
 
     default RunningContainer getContainer(Network network, Service service, ProcessedServices processedServices){
-        Map<String, String> runningEnvironmentVariables = containerEnvironmentVariables(service, processedServices);
+        Map<String, String> configEnvironmentVariables = containerEnvironmentVariables(service, processedServices);
         String command = containerStartupCommand(service);
         List<ContainerVolume> containerVolumes = containerAttachedVolumes(service);
         WaitStrategy httpWaitStrategy = containerServiceHTTPWaiter(service);
@@ -48,7 +48,7 @@ public interface ContainerInitializer {
         }
         container.withNetwork(network);
 
-        container.withEnv(runningEnvironmentVariables);
+        container.withEnv(configEnvironmentVariables);
         container.withExposedPorts(containerExposedPorts(service));
 
         if (command !=null) container.withCommand(command);
@@ -74,7 +74,7 @@ public interface ContainerInitializer {
         container.withCreateContainerCmdModifier(cmd -> cmd.withHostName(service.getName()));
         container.withLogConsumer(new Slf4jLogConsumer(logger));
         return new RunningContainer(
-                container, runningEnvironmentVariables, service.getName()
+                container, configEnvironmentVariables, service.getName()
         );
     }
 }

@@ -50,7 +50,7 @@ public class ConfigurationTest {
     void cyclicDependenciesAreDetected() throws RuntimeException{
         ObjectMapper mapper = new ObjectMapper();
         ContainerConfig config = new ContainerConfig();
-        ConfigServices configServices = config.parseConfig(cyclicConfig());
+        ConfigServices configServices = config.parseConfig(cyclicDependencyConfig());
 
         assertThrows(IllegalArgumentException.class, () -> config.rankConfigServices(
                 Set.of(), mapper.convertValue(new ArrayList<OrderedService>(), new TypeReference<>() {}),

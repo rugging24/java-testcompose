@@ -4,6 +4,7 @@ import de.theitshop.model.config.ExecCommandAfterContainerStartup;
 import de.theitshop.model.config.Service;
 import de.theitshop.model.container.ProcessedServices;
 import de.theitshop.model.container.RunningContainer;
+import lombok.NonNull;
 import org.testcontainers.containers.Network;
 
 import java.io.IOException;
@@ -18,21 +19,17 @@ public class BaseContainer {
         private RunningContainer runningContainer;
         private Service service;
         private ProcessedServices processedServices;
-        private Network containerNetwork;
+        private final Network containerNetwork;
         private List<ExecCommandAfterContainerStartup> execCommandAfterContainerStartup;
 
-        public Builder withTestService(Service service, ProcessedServices processedServices){
-            if (service == null || processedServices == null)
-                throw new IllegalArgumentException("Test Service or Processed Service Object cannot be null");
+        public Builder(@NonNull Network containerNetwork){
+            this.containerNetwork = containerNetwork;
+        }
+
+        public Builder withTestService(@NonNull Service service, @NonNull ProcessedServices processedServices){
             this.service = service;
             this.processedServices = processedServices;
             this.execCommandAfterContainerStartup = service.getExecCommandAfterContainerStartup();
-            return this;
-        }
-
-        public Builder withTestNetwork(Network containerNetwork) {
-            if (containerNetwork == null) throw new IllegalArgumentException("Test Network can not be null");
-            this.containerNetwork = containerNetwork;
             return this;
         }
 

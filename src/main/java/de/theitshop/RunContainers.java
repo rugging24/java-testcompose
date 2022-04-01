@@ -11,6 +11,7 @@ import de.theitshop.model.container.ProcessedServices;
 import de.theitshop.model.container.RunningContainer;
 import de.theitshop.networking.ContainerNetwork;
 import org.testcontainers.DockerClientFactory;
+import org.testcontainers.containers.Network;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,17 +22,26 @@ public class RunContainers {
     private ConfigServices configServices;
     private final ObjectMapper mapper = new ObjectMapper();
     private final ContainerConfig containerConfig = new ContainerConfig();
-    private final ContainerNetwork testNetwork = new ContainerNetwork();
-
+    private Network testNetwork;
 
     public RunContainers() {
+        setTestNetwork(null);
         setConfigServices(null);
         setOrderedServices(getConfigServices().getServices());
     }
 
-    public RunContainers(String configFileName){
+    public RunContainers(String configFileName, Network testNetwork){
+        setTestNetwork(testNetwork);
         setConfigServices(configFileName);
         setOrderedServices(getConfigServices().getServices());
+    }
+
+    private void setTestNetwork(Network network){
+        this.testNetwork = network != null ? network : new ContainerNetwork().getContainerNetwork();
+    }
+
+    public Network getTestNetwork(){
+        return testNetwork;
     }
 
     private void setOrderedServices(List<Service> services){
@@ -64,9 +74,8 @@ public class RunContainers {
         ProcessedServices processedServices =  new ProcessedServices(runningContainerMap);
 
         for(OrderedService os: getOrderedServices()){
-            BaseContainer baseContainer = new BaseContainer.Builder()
+            BaseContainer baseContainer = new BaseContainer.Builder(getTestNetwork())
                     .withTestService(os.getService(), processedServices)
-                    .withTestNetwork(testNetwork.getContainerNetwork())
                     .build();
             baseContainer.startContainer();
             baseContainerMap.put(baseContainer.getRunningContainer().getServiceName(), baseContainer);
@@ -84,7 +93,7 @@ public class RunContainers {
         baseContainerMap.clear();
     }
 
-    private void isDockerRunning(){
+    protected void isDockerRunning(){
         try{
             DockerClientFactory.instance().isDockerAvailable();
         }catch (Exception exc){

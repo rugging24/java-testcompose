@@ -102,7 +102,7 @@ public class ConfigHelper {
         return new ByteArrayInputStream(content.getBytes());
     }
 
-    public static InputStream cyclicConfig(){
+    public static InputStream cyclicDependencyConfig(){
         String content =
                 "services:\n" +
                         "  - name: database\n" +

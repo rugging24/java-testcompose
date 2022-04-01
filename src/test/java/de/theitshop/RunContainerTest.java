@@ -5,16 +5,14 @@ package de.theitshop;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.theitshop.container.BaseContainer;
-import de.theitshop.model.config.OrderedService;
 import org.apache.hc.client5.http.fluent.Content;
 import org.apache.hc.client5.http.fluent.Request;
 import org.apache.hc.core5.http.ContentType;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RunContainerTest {
     @Test void appHasAGreeting() throws Exception {
@@ -55,6 +53,7 @@ class RunContainerTest {
                 .returnContent();
 
         assertEquals(kafkaData, mapper.readValue(kafkaConsumer.asString(), Map.class));
+
         runContainers.stopTestContainers();
         assertEquals(0, runContainers.getBaseContainerMap().size());
     }

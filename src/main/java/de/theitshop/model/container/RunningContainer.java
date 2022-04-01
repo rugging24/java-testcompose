@@ -22,6 +22,6 @@ public class RunningContainer implements Serializable {
      *  - container service name
      */
     private GenericContainer<?> container;
-    private Map<String, String> environmentVariables;
+    private Map<String, String> configEnvironmentVariables;
     private String serviceName;
 }

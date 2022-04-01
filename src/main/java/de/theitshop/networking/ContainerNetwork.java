@@ -7,8 +7,7 @@ public class ContainerNetwork {
     private Network containerNetwork;
 
     public ContainerNetwork(){
-        Network network = Network.newNetwork();
-        setContainerNetwork(network);
+        setContainerNetwork(Network.newNetwork());
     }
 
     private void setContainerNetwork(Network network){
