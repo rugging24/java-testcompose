@@ -9,7 +9,7 @@ import de.theitshop.model.config.containermodules.kafka.Zookeeper;
 import lombok.Getter;
 import lombok.ToString;
 
-@Getter //(onMethod_={@JsonIgnore})
+@Getter
 @ToString
 public class TestContainersModule {
     private static final String MODULE_NAME_FIELD = "module_name";
