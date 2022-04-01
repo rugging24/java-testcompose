@@ -1,12 +1,12 @@
 package de.theitshop.config;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.io.Files;
 import de.theitshop.model.config.ConfigServices;
 import de.theitshop.model.config.OrderedService;
 import de.theitshop.model.config.Service;
+import lombok.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,9 +72,7 @@ public class ContainerConfig {
                     + serviceName + " and service :" + neededService.getName());
     }
 
-    public List<OrderedService> rankConfigServices(Set<String> serviceNames, List<OrderedService> processedServices, List<Service> unprocessedServices){
-        if(unprocessedServices == null)
-            throw new IllegalArgumentException("List of Services to be tested can not be null");
+    public List<OrderedService> rankConfigServices(Set<String> serviceNames, List<OrderedService> processedServices, @NonNull List<Service> unprocessedServices){
         if(unprocessedServices.size() == 0){
             if (serviceNames.size() != processedServices.size())
                 throw new RuntimeException("Ordered Service improperly computed!");

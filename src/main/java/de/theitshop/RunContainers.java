@@ -10,6 +10,7 @@ import de.theitshop.model.config.Service;
 import de.theitshop.model.container.ProcessedServices;
 import de.theitshop.model.container.RunningContainer;
 import de.theitshop.networking.ContainerNetwork;
+import lombok.NonNull;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.Network;
 
@@ -30,7 +31,7 @@ public class RunContainers {
         setOrderedServices(getConfigServices().getServices());
     }
 
-    public RunContainers(String configFileName, Network testNetwork){
+    public RunContainers(@NonNull String configFileName, @NonNull Network testNetwork){
         setTestNetwork(testNetwork);
         setConfigServices(configFileName);
         setOrderedServices(getConfigServices().getServices());
