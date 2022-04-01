@@ -22,6 +22,4 @@ jobs:
       - name: Pull required test container
         run: docker pull testcontainers/ryuk:0.3.3
       - name: Run Gradle Build
-        uses: gradle/gradle-build-action@v2
-        with:
-          arguments: build
+        run: ./gradlew build
