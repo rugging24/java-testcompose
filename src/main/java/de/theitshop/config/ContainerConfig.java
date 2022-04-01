@@ -55,24 +55,24 @@ public class ContainerConfig {
     }
 
     private void checkCyclicDependency(String serviceName, String dependentServiceName, List<OrderedService> processedServices, List<Service> unprocessedServices){
-        Service neededService = null;
+        Service checkService = null;
         for (Service s: unprocessedServices){
             if (s.getName().equalsIgnoreCase(dependentServiceName))
-                neededService = s;
+                checkService = s;
         }
-        if (neededService == null){
+        if (checkService == null){
             for (OrderedService s: processedServices){
                 if (s.getService().getName().equalsIgnoreCase(dependentServiceName))
-                    neededService = s.getService();
+                    checkService = s.getService();
             }
         }
-        assert neededService != null;
-        if (neededService.getDependsOn().contains(serviceName))
+        assert checkService != null;
+        if (checkService.getDependsOn().contains(serviceName))
             throw new IllegalArgumentException("Cyclic container relationship found for service "
-                    + serviceName + " and service :" + neededService.getName());
+                    + serviceName + " and service :" + checkService.getName());
     }
 
-    public List<OrderedService> rankConfigServices(Set<String> serviceNames, List<OrderedService> processedServices, @NonNull List<Service> unprocessedServices){
+    public List<OrderedService> rankConfigServices(@NonNull Set<String> serviceNames, @NonNull List<OrderedService> processedServices, @NonNull List<Service> unprocessedServices){
         if(unprocessedServices.size() == 0){
             if (serviceNames.size() != processedServices.size())
                 throw new RuntimeException("Ordered Service improperly computed!");

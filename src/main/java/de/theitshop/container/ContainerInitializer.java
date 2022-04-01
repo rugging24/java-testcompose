@@ -44,7 +44,7 @@ public interface ContainerInitializer {
                     .moduleContainer(service.getName(), imageName, processedServices);
         }else {
             container = new GenericContainer<>(imageName);
-            container.withImagePullPolicy(PullPolicy.alwaysPull());
+            container.withImagePullPolicy(PullPolicy.defaultPolicy());
         }
         container.withNetwork(network);
 
