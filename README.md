@@ -1,11 +1,21 @@
-# java-testcompose
+# Testcompose
 A clean way to run your containerised tests
 
 ## Installation
+
+### Maven
 ```
-ToDo: Setup the jar on mavenCentral
+<dependency>
+  <groupId>de.theitshop</groupId>
+  <artifactId>testcompose</artifactId>
+  <version>${version}</version>
+</dependency>
 ```
 
+### Gradle
+```
+implementation 'de.theitshop:testcompose:${version}'
+```
 ## Configuration
 `testcompose` accepts a `yaml` config file ideally placed in the resource folder and named `testcompose-bootstrap` witih the 
 appropriate `yaml` or `yml` extension. One can also use a differently named config file, and provide it to the constructor call 

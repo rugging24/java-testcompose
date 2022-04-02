@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-group = groupId
+group = artifactGroupId
 version = packageVersion
 sourceCompatibility = JavaVersion.VERSION_11
 
@@ -52,7 +52,7 @@ tasks.named('jar') {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        maven(MavenPublication) {
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
@@ -65,13 +65,23 @@ publishing {
             artifactId = artifactId
             version = project.version
             from components.java
+
+            pom {
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution = 'repo'
+                    }
+                }
+            }
         }
     }
     repositories {
         maven {
-            url mavenCentral()
+            url mvnMainRepoUrl
             credentials {
-                username mvnCentralUsername
+                username System.env.MAVEN_CENTRAL_USERNAME
                 password System.env.MAVEN_CENTRAL_TOKEN
             }
         }
