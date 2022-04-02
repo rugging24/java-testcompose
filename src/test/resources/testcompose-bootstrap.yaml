@@ -1,0 +1,70 @@
+services:
+  - name: database
+    image: "postgres:13"
+    command: ""
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres_db
+      POSTGRES_PASSWORD: password
+    exposed_ports:
+      - 5432
+    log_wait_parameters:
+      log_line_regex: ".*database system is ready to accept connections.*"
+      log_line_regex_occurrence: 1
+  - name: application
+    image: "python:3.9"
+    command: "/bin/bash -x /run_app.sh"
+    environment:
+      DB_URL: "${{database.postgres_user}}:${{database.postgres_password}}@${{database.container_hostname}}:5432/${{database.postgres_db}}"
+      KAFKA_BOOTSTRAP_SERVERS: "${{kafka.container_hostname}}:9092"
+      KAFKA_OFFSET_RESET: "earliest"
+      KAFKA_TOPIC: "test_kafka_topic"
+    exposed_ports:
+      - 8000
+    volumes:
+      - host: "docker-test-files/run_app.sh"
+        container: "/run_app.sh"
+        mode: "ro"
+        source: "resources"
+      - host: "docker-test-files/app.py"
+        container: "/app.py"
+        mode: "ro"
+        source: "resources"
+    log_wait_parameters:
+      log_line_regex: ".*Application startup complete.*"
+      log_line_regex_occurrence: 1
+    http_wait_parameters:
+      http_port: "8000"
+      response_status_code: 200
+      end_point: "/ping"
+    depends_on:
+      - database
+      - kafka
+  - name: zookeeper
+    image: confluentinc/cp-zookeeper:6.2.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    log_wait_parameters:
+      log_line_regex: ".*Started AdminServer on address.*"
+      log_line_regex_occurrence: 1
+    exposed_ports:
+      - 2181
+  - name: kafka
+    image: confluentinc/cp-kafka:6.2.1
+    test_containers_module:
+      module_name: KafkaContainer
+      module_parameters:
+        zookeeper:
+          external: true
+          connection_string: "${{zookeeper.container_hostname}}:${{zookeeper.zookeeper_client_port}}"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    exposed_ports:
+      - 9093
+    depends_on:
+      - zookeeper
