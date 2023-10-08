@@ -14,7 +14,7 @@ A clean way to run your containerised tests
 
 ### Gradle
 ```
-implementation 'de.theitshop:testcompose:${version}'
+testImplementation 'de.theitshop:testcompose:${version}'
 ```
 ## Configuration
 `testcompose` accepts a `yaml` config file ideally placed in the resource folder and named `testcompose-bootstrap` witih the 
@@ -96,7 +96,7 @@ specified in the `DB_URL` environment variable. i.e.
 ```
 DB_URL: "${{database.postgres_user}}:${{database.postgres_password}}@${{database.container_hostname}}:5432/${{database.postgres_db}}"
 
-The placeholder is off two sections => serviceName.environmentVariable
+The placeholder is of two sections => serviceName.environmentVariable
 i.e. ${{database.postgres_user}}
 Means:
 The environment variable `postgres_user` could be optained from the service `database`

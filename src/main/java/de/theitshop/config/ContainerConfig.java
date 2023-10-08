@@ -39,6 +39,7 @@ public class ContainerConfig {
         try{
             configServices = yamlMapper.readValue(stream, ConfigServices.class);
         }catch (IOException exc){
+            //noinspection CallToPrintStackTrace
             exc.printStackTrace();
             throw new RuntimeException();
         }
@@ -73,7 +74,7 @@ public class ContainerConfig {
     }
 
     public List<OrderedService> rankConfigServices(@NonNull Set<String> serviceNames, @NonNull List<OrderedService> processedServices, @NonNull List<Service> unprocessedServices){
-        if(unprocessedServices.size() == 0){
+        if(unprocessedServices.isEmpty()){
             if (serviceNames.size() != processedServices.size())
                 throw new RuntimeException("Ordered Service improperly computed!");
             return processedServices;
@@ -82,7 +83,7 @@ public class ContainerConfig {
             List<OrderedService> processedServicesCopy = new ArrayList<>(processedServices);
             int rank = processedServicesCopy.size();
             for (Service service: unprocessedServices){
-                if (service.getDependsOn().size() == 0){
+                if (service.getDependsOn().isEmpty()){
                     processedServiceNames.add(service.getName());
                     processedServicesCopy.add(new OrderedService(rank, service));
                     rank+=1;

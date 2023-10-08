@@ -12,7 +12,7 @@ services:
       log_line_regex: ".*database system is ready to accept connections.*"
       log_line_regex_occurrence: 1
   - name: application
-    image: "python:3.9"
+    image: "python:3.11"
     command: "/bin/bash -x /run_app.sh"
     environment:
       DB_URL: "${{database.postgres_user}}:${{database.postgres_password}}@${{database.container_hostname}}:5432/${{database.postgres_db}}"
@@ -41,7 +41,7 @@ services:
       - database
       - kafka
   - name: zookeeper
-    image: confluentinc/cp-zookeeper:6.2.1
+    image: confluentinc/cp-zookeeper:7.5.1
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -51,7 +51,7 @@ services:
     exposed_ports:
       - 2181
   - name: kafka
-    image: confluentinc/cp-kafka:6.2.1
+    image: confluentinc/cp-kafka:7.5.1
     test_containers_module:
       module_name: KafkaContainer
       module_parameters:
@@ -62,7 +62,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 3
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     exposed_ports:
       - 9093

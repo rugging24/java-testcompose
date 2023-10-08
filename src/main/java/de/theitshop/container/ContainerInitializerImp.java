@@ -33,7 +33,7 @@ public class ContainerInitializerImp implements ContainerInitializer {
     @Override
     public Integer[] containerExposedPorts(Service service) {
         List<Integer> exposedPorts = new ArrayList<>(List.of());
-        if(service.getExposedPorts() != null && service.getExposedPorts().size() > 0){
+        if(service.getExposedPorts() != null && !service.getExposedPorts().isEmpty()){
             exposedPorts.addAll(service.getExposedPorts());
         }
         return exposedPorts.toArray(new Integer[0]);

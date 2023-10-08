@@ -10,6 +10,7 @@ import de.theitshop.model.config.Service;
 import de.theitshop.model.container.ProcessedServices;
 import de.theitshop.model.container.RunningContainer;
 import de.theitshop.networking.ContainerNetwork;
+import lombok.Getter;
 import lombok.NonNull;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.Network;
@@ -18,11 +19,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class RunContainers {
+    @Getter
     private List<OrderedService> orderedServices;
+    @Getter
     private Map<String, BaseContainer> baseContainerMap;
+    @Getter
     private ConfigServices configServices;
     private final ObjectMapper mapper = new ObjectMapper();
     private final ContainerConfig containerConfig = new ContainerConfig();
+    @Getter
     private Network testNetwork;
 
     public RunContainers() {
@@ -41,31 +46,16 @@ public class RunContainers {
         this.testNetwork = network != null ? network : new ContainerNetwork().getContainerNetwork();
     }
 
-    public Network getTestNetwork(){
-        return testNetwork;
-    }
-
     private void setOrderedServices(List<Service> services){
         this.orderedServices = containerConfig.rankConfigServices(
-                        Set.of(), mapper.convertValue(new ArrayList<OrderedService>(), new TypeReference<>() {}),
-                        services)
-                .stream().sorted().collect(Collectors.toList());
-    }
-
-    public List<OrderedService> getOrderedServices(){
-        return orderedServices;
+                        Set.of(),
+                        mapper.convertValue(new ArrayList<OrderedService>(), new TypeReference<>() {}),
+                        services
+        ).stream().sorted().collect(Collectors.toList());
     }
 
     private void setConfigServices(String configFileName){
         this.configServices = containerConfig.parseConfig(containerConfig.readTestConfig(configFileName));
-    }
-
-    public ConfigServices getConfigServices(){
-        return configServices;
-    }
-
-    public Map<String, BaseContainer> getBaseContainerMap(){
-        return baseContainerMap;
     }
 
     public void startTestContainers(){
@@ -88,7 +78,7 @@ public class RunContainers {
     public void stopTestContainers() {
         isDockerRunning();
         Collections.reverse(getOrderedServices());
-        if (getOrderedServices().size() != 0 && baseContainerMap.size() != 0){
+        if (!getOrderedServices().isEmpty() && !baseContainerMap.isEmpty()){
             getOrderedServices().forEach(c -> baseContainerMap.get(c.getService().getName()).stopContainer());
         }
         baseContainerMap.clear();
@@ -98,6 +88,7 @@ public class RunContainers {
         try{
             DockerClientFactory.instance().isDockerAvailable();
         }catch (Exception exc){
+            //noinspection CallToPrintStackTrace
             exc.printStackTrace();
             throw new RuntimeException("Docker doesn't seem to be running on this machine");
         }
