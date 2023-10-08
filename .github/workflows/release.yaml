@@ -1,0 +1,30 @@
+name: ReleaseTags
+on:
+  workflow_run:
+    workflows:
+      - TestsRunner
+    branches:
+      - main
+    types:
+      - completed
+jobs:
+  create-release-tags:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Java 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+      - name: Gradle Setup
+        uses: gradle/gradle-build-action@v2
+      - name: Pull required test container
+        run: docker pull testcontainers/ryuk:0.3.3
+      - name: Run Gradle Build
+        run: ./gradlew build
+      - name: Create Release Tag & Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: bash -x scripts/release.sh  ${{ secrets.MAVEN_CENTRAL_TOKEN }}
