@@ -1,8 +1,10 @@
 package de.theitshop.networking;
 
 
+import lombok.Getter;
 import org.testcontainers.containers.Network;
 
+@Getter
 public class ContainerNetwork {
     private Network containerNetwork;
 
@@ -12,9 +14,5 @@ public class ContainerNetwork {
 
     private void setContainerNetwork(Network network){
         this.containerNetwork = network;
-    }
-
-    public Network getContainerNetwork(){
-        return containerNetwork;
     }
 }

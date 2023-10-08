@@ -12,33 +12,34 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.projectlombok:lombok:1.18.22'
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.22'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.13.0'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.13.0'
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.13.0'
-    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.13.2'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.30'
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.30'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.15.2'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.15.2'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.15.2'
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.15.2'
+    implementation group: 'com.google.guava', name: 'guava', version: '32.1.2-jre'
 
-    implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'
-
-    implementation group: 'org.testcontainers', name: 'testcontainers', version: '1.16.3'
-    implementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.16.3'
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+    implementation group: 'org.testcontainers', name: 'testcontainers', version: '1.19.1'
+    implementation group: 'org.testcontainers', name: 'junit-jupiter', version: '1.19.1'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.9'
     // test container modules
-    implementation group: 'org.testcontainers', name: 'kafka', version: '1.16.3'
+    implementation group: 'org.testcontainers', name: 'kafka', version: '1.19.1'
 
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.2'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.2'
-    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.4.0'
-    testImplementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5-fluent', version: '5.1.3'
-
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.10.0'
+    testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.9'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.5.0'
+    testImplementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5-fluent', version: '5.2.1'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
-    testLogging.showStandardStreams = true
+    testLogging {
+        showStandardStreams = true
+        exceptionFormat = "full"
+    }
 }
 
 tasks.named('jar') {
@@ -52,7 +53,7 @@ tasks.named('jar') {
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        mavenJava(MavenPublication) {
             versionMapping {
                 usage('java-api') {
                     fromResolutionOf('runtimeClasspath')
@@ -81,8 +82,8 @@ publishing {
         maven {
             url mvnMainRepoUrl
             credentials {
-                username System.env.MAVEN_CENTRAL_USERNAME
-                password System.env.MAVEN_CENTRAL_TOKEN
+                username mvnRepoUsername
+                password mvnRepoPassword
             }
         }
     }
@@ -95,6 +96,6 @@ java {
 
 javadoc {
     if(JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_11)) {
-        options.addBooleanOption('html5', true)
+        options.addBooleanOption 'html5', true
     }
 }
