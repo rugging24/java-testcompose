@@ -50,7 +50,7 @@ function release() {
       --method POST \
       -H "Accept: application/vnd.github+json" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      rugging24/java-testcompose/releases \
+      /repos/rugging24/java-testcompose/releases \
       -f tag_name="${latest_version}" \
      -f target_commitish='main' \
      -f name="${latest_version}" \
