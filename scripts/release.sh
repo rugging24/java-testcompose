@@ -44,6 +44,7 @@ function release() {
   local latest_version=
   local password="${1}"
   latest_version=$(git describe --tags "$(git rev-list --tags --max-count=1)")
+  ./gradlew build -PpackageVersion="${latest_version}"
   ./gradlew publish -PmvnRepoPassword="${password}" -PpackageVersion="${latest_version}"
   gh api \
       --method POST \
@@ -56,8 +57,9 @@ function release() {
      -f body="Release ${latest_version}" \
      -F draft=false \
      -F prerelease=false \
-     -F generate_release_notes=true
+     -F generate_release_notes=false
 }
+
 PASSWORD="${1}"
 
 compute_version
