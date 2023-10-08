@@ -27,4 +27,4 @@ jobs:
       - name: Create Release Tag & Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: bash -x scripts/release.sh  ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+        run: bash -x scripts/release.sh  ${{ secrets.MAVEN_CENTRAL_TOKEN }}
