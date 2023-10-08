@@ -57,7 +57,7 @@ function release() {
      -f body="Release ${latest_version}" \
      -F draft=false \
      -F prerelease=false \
-     -F generate_release_notes=false
+     -F generate_release_notes=true
 }
 
 PASSWORD="${1}"
