@@ -33,10 +33,10 @@ function compute_version() {
         exit 1
     fi
 
-#    git config user.email "rugging24@gmail.com"
-#    git config user.name "Olakunle Olaniyi"
-#    git tag -a "${latest_version}" -m "creating ${latest_version} release tag"
-#    git push origin tag "${latest_version}"
+    git config user.email "rugging24@gmail.com"
+    git config user.name "Olakunle Olaniyi"
+    git tag -a "${latest_version}" -m "creating ${latest_version} release tag"
+    git push origin tag "${latest_version}"
     echo ${latest_version}
 }
 
@@ -63,4 +63,4 @@ function release() {
 PASSWORD="${1}"
 
 compute_version
-#release "${PASSWORD}"
+release "${PASSWORD}"
