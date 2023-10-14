@@ -11,19 +11,19 @@ function compute_version() {
     local update_version=
     current_version=$(git describe --tags "$(git rev-list --tags --max-count=1)")
     if [ ! -z "${current_version}" ]; then
-        major_version=$(echo "${current_version}" | awk '{split($0,a,"."); print a[1]}')
-        minor_version=$(echo "${current_version}" | awk '{split($0,a,"."); print a[2]}')
-        update_version=$(echo "${current_version}" | awk '{split($0,a,"."); print a[3]}')
-
-        if [ $(("${update_version}" + 1)) -ge 11 ]; then
+        declare -a version=($(echo "${current_version}" | tr "." " "))
+        major_version=${version[0]}
+        minor_version=${version[1]}
+        update_version=${version[2]}
+        if [ $((${update_version} + 1)) -ge 11 ]; then
             update_version=0
-            minor_version=$(("${minor_version}" + 1))
+            minor_version=$((${minor_version} + 1))
             if [ ${minor_version} -ge 20 ]; then
                 minor_version=0
-                major_version=$(("${major_version}" + 1 ))
+                major_version=$((${major_version} + 1 ))
             fi
         else
-            update_version=$(("${update_version}" + 1))
+            update_version=$((${update_version} + 1))
         fi
         latest_version="${major_version}.${minor_version}.${update_version}"
     fi
@@ -33,10 +33,10 @@ function compute_version() {
         exit 1
     fi
 
-    git config user.email "rugging24@gmail.com"
-    git config user.name "Olakunle Olaniyi"
-    git tag -a "${latest_version}" -m "creating ${latest_version} release tag"
-    git push origin tag "${latest_version}"
+#    git config user.email "rugging24@gmail.com"
+#    git config user.name "Olakunle Olaniyi"
+#    git tag -a "${latest_version}" -m "creating ${latest_version} release tag"
+#    git push origin tag "${latest_version}"
     echo ${latest_version}
 }
 
@@ -63,4 +63,4 @@ function release() {
 PASSWORD="${1}"
 
 compute_version
-release "${PASSWORD}"
+#release "${PASSWORD}"
